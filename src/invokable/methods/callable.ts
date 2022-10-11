@@ -1,10 +1,13 @@
-import { https } from 'firebase-functions'
+import { https, runWith } from 'firebase-functions'
 
 import {
   AuthenticatedContext,
   InvokableAction,
   BodyValidationSchema,
+  InvokableRuntimeModes,
+  OnCallHandler,
 } from '../type'
+import { getRunOptions } from '../utils/mode'
 import { invoke } from '../utils/invoke'
 import { validate } from '../utils/validate'
 import { userHasPermission } from '../../permissions'
@@ -26,8 +29,11 @@ import { userHasPermission } from '../../permissions'
 export const callable = <Body, Response = void>(options: {
   action: InvokableAction<Body, Response>
   validation?: BodyValidationSchema
-  scope?: (args: Body) => string[]
-}) => async (body: Body, context: AuthenticatedContext & any) => {
+  scope?: string | ((args: Body) => string[])
+}): OnCallHandler => async (
+  body: Body,
+  context: AuthenticatedContext & any,
+) => {
   if (!context.auth) {
     throw new https.HttpsError('unauthenticated', 'user is not authenticated')
   }
@@ -35,7 +41,11 @@ export const callable = <Body, Response = void>(options: {
   await validate(body, options?.validation)
 
   if (options?.scope) {
-    const scope = options?.scope(body)
+    const scope =
+      typeof options?.scope === 'string'
+        ? [options?.scope]
+        : options?.scope(body)
+
     const permission = await userHasPermission(context.auth.uid, ...scope)
     if (!permission) {
       throw new https.HttpsError(
@@ -48,3 +58,8 @@ export const callable = <Body, Response = void>(options: {
   const response = await invoke(options.action, body, context)
   return response
 }
+
+export const onCall = (
+  onCallHandler: OnCallHandler,
+  modes?: InvokableRuntimeModes,
+) => runWith(getRunOptions(modes)).https.onCall(onCallHandler)
