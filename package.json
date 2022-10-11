@@ -30,16 +30,16 @@
       "pre-commit": "tsdx lint"
     }
   },
-  "name": "@humancollective/human-firebase-cloud-utils",
+  "name": "@humancollective/cloud-firebase",
   "author": "Human Collective Inc.",
-  "module": "dist/human-firebase-cloud-utils.esm.js",
+  "module": "dist/cloud-firebase.esm.js",
   "size-limit": [
     {
-      "path": "dist/human-firebase-cloud-utils.cjs.production.min.js",
+      "path": "dist/cloud-firebase.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/human-firebase-cloud-utils.esm.js",
+      "path": "dist/cloud-firebase.esm.js",
       "limit": "10 KB"
     }
   ],
