@@ -1,5 +1,5 @@
-# Firebase Cloud Utils
+# Human Cloud Firebase
 
-### `@humancollective/human-firebase-cloud-utils`
+### `@humancollective/cloud-firebase`
 
 This package contains a set of utilities for working with Firebase Cloud Functions.
