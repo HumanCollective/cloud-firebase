@@ -1,9 +1,15 @@
-import { https } from 'firebase-functions'
+import { https, runWith } from 'firebase-functions'
 
 import { getKey } from '../../keys'
-import { BodyValidationSchema, InvokableAction } from '../type'
+import {
+  BodyValidationSchema,
+  InvokableAction,
+  InvokableRuntimeModes,
+  OnRequestHandler,
+} from '../type'
 import { validate } from '../utils/validate'
 import { invoke } from '../utils/invoke'
+import { getRunOptions } from '../utils/mode'
 
 // REQUESTABLE
 // -----------
@@ -46,3 +52,8 @@ export const requestable = <Body, Response = void>(
   res.send(response)
   res.end()
 }
+
+export const onRequest = (
+  onRequestHandler: OnRequestHandler,
+  modes: InvokableRuntimeModes,
+) => runWith(getRunOptions(modes)).https.onRequest(onRequestHandler)
