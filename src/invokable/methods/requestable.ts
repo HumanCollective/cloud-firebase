@@ -10,7 +10,7 @@ import {
 } from '../type'
 import { validate } from '../utils/validate'
 import { invoke } from '../utils/invoke'
-import { getRunOptions } from '../utils/mode'
+import { getRunOptions } from '../utils/getRunOptions'
 
 // REQUESTABLE
 // -----------
@@ -29,7 +29,7 @@ import { getRunOptions } from '../utils/mode'
 export const requestable = <Body, Response = void>(
   action: InvokableAction<Body, Response>,
   validationSchema?: BodyValidationSchema,
-) => async (req: https.Request, res: express.Response) => {
+): OnRequestHandler => async (req: https.Request, res: express.Response) => {
   // Ensure that an x-api-key header was provided.
   const keyHash = req.header('x-api-key')
   if (!keyHash) {

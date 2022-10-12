@@ -7,17 +7,26 @@ interface FirstoreDeleteOptions {
   debugName?: string
 }
 
-export const firestoreDelete = ({
-  collectionPath,
-  debugName = 'document',
-}: FirstoreDeleteOptions) => async (id: string) => {
+/**
+ * Utility for deletion of a firestore document
+ * @param recursive Recursively delete all documents and subcollections at and under the specified level. If false, the document will not be deleted if it contains nested documents
+ */
+export const firestoreDelete = (
+  { collectionPath, debugName = 'document' }: FirstoreDeleteOptions,
+  recursive: boolean = false,
+) => async (id: string) => {
   try {
     Log.breadcrumb(`deleting ${debugName} with id "${id}"`)
 
     const ref = await firestore()
       .collection(collectionPath)
       .doc(id)
-      .delete()
+
+    if (recursive) {
+      await firestore().recursiveDelete(ref)
+    } else {
+      await ref.delete()
+    }
 
     return ref
   } catch (error) {

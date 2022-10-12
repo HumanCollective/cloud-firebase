@@ -7,7 +7,7 @@ import {
   InvokableRuntimeModes,
   OnCallHandler,
 } from '../type'
-import { getRunOptions } from '../utils/mode'
+import { getRunOptions } from '../utils/getRunOptions'
 import { invoke } from '../utils/invoke'
 import { validate } from '../utils/validate'
 import { userHasPermission } from '../../permissions'
