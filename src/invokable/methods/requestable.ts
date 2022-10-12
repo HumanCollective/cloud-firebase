@@ -1,4 +1,5 @@
 import { https, runWith } from 'firebase-functions'
+import * as express from 'express'
 
 import { getKey } from '../../keys'
 import {
@@ -28,9 +29,7 @@ import { getRunOptions } from '../utils/mode'
 export const requestable = <Body, Response = void>(
   action: InvokableAction<Body, Response>,
   validationSchema?: BodyValidationSchema,
-  // Note: this should be typed as `req: https.Request, res: express.Response`,
-  // but it's causing a type error on build.
-) => async (req: any, res: any) => {
+) => async (req: https.Request, res: express.Response) => {
   // Ensure that an x-api-key header was provided.
   const keyHash = req.header('x-api-key')
   if (!keyHash) {
