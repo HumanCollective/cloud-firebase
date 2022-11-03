@@ -26,10 +26,11 @@ import { getRunOptions } from '../utils/getRunOptions'
 //   * Performs validation on the body.
 //   * Performs any necessary logging.
 
-export const requestable = <Body, Response = void>(
-  action: InvokableAction<Body, Response>,
-  validationSchema?: BodyValidationSchema,
-): OnRequestHandler => async (req: https.Request, res: express.Response) => {
+export const requestable = <Body, Response = void>(options: {
+  action: InvokableAction<Body, Response>
+  validation?: BodyValidationSchema
+  scope?: (args: Body) => string[]
+}): OnRequestHandler => async (req: https.Request, res: express.Response) => {
   // Ensure that an x-api-key header was provided.
   const keyHash = req.header('x-api-key')
   if (!keyHash) {
@@ -45,8 +46,10 @@ export const requestable = <Body, Response = void>(
     throw new https.HttpsError('unauthenticated', 'API key not found.')
   }
 
-  await validate(req.body, validationSchema)
-  const response = invoke(action, req.body, { auth: { uid: key.uid } })
+  await validate(req.body, options.validation)
+  const response = invoke(options.action, req.body, {
+    auth: { uid: key.uid },
+  })
 
   res.send(response)
   res.end()
