@@ -1,18 +1,18 @@
 import { firestore } from 'firebase-admin'
 import { Log } from '../../Log'
 
-interface FirstoreCreateOptions<A = undefined> {
+interface FirstoreCreateOptions<T, A = Record<string, any>> {
   // The collection path to add the document to.
   // This can be a string or a function that returns a string based on the parts
   // passed into the action.
-  collectionPath: string | ((args: A) => string)
+  collectionPath: string | ((args: A & { data: T }) => string)
   debugName?: string
 }
 
-export const firestoreAdd = <T, A = undefined>({
+export const firestoreAdd = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
-}: FirstoreCreateOptions<A>) => async (item: T, args?: A) => {
+}: FirstoreCreateOptions<T, A>) => async (item: T, args?: A) => {
   try {
     Log.breadcrumb(`creating ${debugName}`)
 
@@ -22,7 +22,7 @@ export const firestoreAdd = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args ?? ({} as A)),
+          : collectionPath({ ...(args as A), data }),
       )
       .add(data)
 

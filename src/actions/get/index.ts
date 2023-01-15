@@ -3,16 +3,16 @@ import { WithId } from '../../type'
 import { Log } from '../../Log'
 import { readSnapshot } from '../readSnapshot'
 
-interface FirstoreGetOptions<Args = undefined> {
+interface FirstoreGetOptions<A = Record<string, any>> {
   // The collection path to add the document to.
   // This can be a string or a function that returns a string based on the parts
   // passed into the action.
   // (see the advanced example in src/actions/add/index.ts)
-  collectionPath: string | ((args: Args) => string)
+  collectionPath: string | ((args: A) => string)
   debugName?: string
 }
 
-export const firestoreGet = <T, A = undefined>({
+export const firestoreGet = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
 }: FirstoreGetOptions<A>) => async (id: string, args?: A) => {
@@ -23,7 +23,7 @@ export const firestoreGet = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args ?? ({} as A)),
+          : collectionPath({ ...(args as A) }),
       )
       .doc(id)
       .get()

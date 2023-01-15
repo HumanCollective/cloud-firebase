@@ -1,16 +1,16 @@
 import { captureException, addBreadcrumb } from '@sentry/node'
 import { firestore } from 'firebase-admin'
 
-interface FirestoreExistsOrHasChildrenOptions<Args = undefined> {
+interface FirestoreExistsOrHasChildrenOptions<A = Record<string, any>> {
   // The collection path to add the document to.
   // This can be a string or a function that returns a string based on the parts
   // passed into the action.
   // (see the advanced example in src/actions/add/index.ts)
-  collectionPath: string | ((args: Args) => string)
+  collectionPath: string | ((args: A) => string)
   debugName?: string
 }
 
-export const firestoreExistsOrHasChildren = <A = undefined>({
+export const firestoreExistsOrHasChildren = <A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
 }: FirestoreExistsOrHasChildrenOptions<A>) => async (id: string, args?: A) => {
@@ -25,7 +25,7 @@ export const firestoreExistsOrHasChildren = <A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args ?? ({} as A)),
+          : collectionPath({ ...(args as A) }),
       )
       .doc(id)
       .get()

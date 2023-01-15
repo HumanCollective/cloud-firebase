@@ -1,19 +1,19 @@
 import { firestore } from 'firebase-admin'
 import { Log } from '../../Log'
 
-interface FirstoreUpdateOptions<Args = undefined> {
+interface FirstoreUpdateOptions<T, A = Record<string, any>> {
   // The collection path to add the document to.
   // This can be a string or a function that returns a string based on the parts
   // passed into the action.
   // (see the advanced example in src/actions/add/index.ts)
-  collectionPath: string | ((args: Args) => string)
+  collectionPath: string | ((args: A & { data: Partial<T> }) => string)
   debugName?: string
 }
 
-export const firestoreUpdate = <T, A = undefined>({
+export const firestoreUpdate = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
-}: FirstoreUpdateOptions<A>) => async (
+}: FirstoreUpdateOptions<T, A>) => async (
   id: string,
   updates: Partial<T>,
   args?: A,
@@ -27,7 +27,7 @@ export const firestoreUpdate = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args ?? ({} as A)),
+          : collectionPath({ ...(args as A), data }),
       )
       .doc(id)
       .update(data)
