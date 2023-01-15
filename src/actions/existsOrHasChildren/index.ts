@@ -1,15 +1,19 @@
 import { captureException, addBreadcrumb } from '@sentry/node'
 import { firestore } from 'firebase-admin'
 
-interface FirestoreExistsOrHasChildrenOptions {
-  collectionPath: string
+interface FirestoreExistsOrHasChildrenOptions<Args = undefined> {
+  // The collection path to add the document to.
+  // This can be a string or a function that returns a string based on the parts
+  // passed into the action.
+  // (see the advanced example in src/actions/add/index.ts)
+  collectionPath: string | ((args: Args) => string)
   debugName?: string
 }
 
-export const firestoreExistsOrHasChildren = ({
+export const firestoreExistsOrHasChildren = <A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirestoreExistsOrHasChildrenOptions) => async (id: string) => {
+}: FirestoreExistsOrHasChildrenOptions<A>) => async (id: string, args: A) => {
   try {
     addBreadcrumb({
       category: 'firebase',
@@ -18,23 +22,28 @@ export const firestoreExistsOrHasChildren = ({
     })
 
     const ref = await firestore()
-      .collection(collectionPath)
+      .collection(
+        typeof collectionPath === 'string'
+          ? collectionPath
+          : collectionPath(args),
+      )
       .doc(id)
       .get()
 
     // check if the document exists
     if (ref.exists) return true
 
-    /* 
-                
-                some document ids appear in italics on firestore. This means the document does not actually exist but has sub collections. This happens when you create sub collection to an empty document. 
-                
-                E.g. in user-attendance/{uid}/user-attendance shows, user-attendance/{uid} does not actually exist, but user-attendance/{uid}/user-attendance was created. So, the uid in user-attendance/{uid} will show up in italics.
+    // some document ids appear in italics on firestore. This means the document
+    // does not actually exist but has sub collections. This happens when you
+    // create sub collection to an empty document.
 
-                For such documents, doc.exists returns false. https://stackoverflow.com/a/48069564/4380666 
+    // For such documents, doc.exists returns false.
+    // https://stackoverflow.com/a/48069564/4380666
 
-                However, we want to make sure we identify such documents as well. So if a document has subcollections, in our terminology, it exists as well (as opposed to firestore which says it doesn't)
-                */
+    // However, we want to make sure we identify such documents as well.
+    // So if a document has subcollections, in our terminology, it exists as
+    // well (as opposed to firestore which says it doesn't)
+
     const hasSubCollections = (await ref.ref.listCollections()).length > 0
     return hasSubCollections
   } catch (error) {

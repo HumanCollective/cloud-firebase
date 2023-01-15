@@ -1,22 +1,34 @@
 import { firestore } from 'firebase-admin'
 import { Log } from '../../Log'
 
-interface FirstoreMergeOptions {
-  collectionPath: string
+interface FirstoreMergeOptions<Args = undefined> {
+  // The collection path to add the document to.
+  // This can be a string or a function that returns a string based on the parts
+  // passed into the action.
+  // (see the advanced example in src/actions/add/index.ts)
+  collectionPath: string | ((args: Args) => string)
   debugName?: string
 }
 
-export const firestoreMerge = <T>({
+export const firestoreMerge = <T, A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirstoreMergeOptions) => async (id: string, item: Partial<T>) => {
+}: FirstoreMergeOptions<A>) => async (
+  id: string,
+  item: Partial<T>,
+  args: A,
+) => {
   try {
     Log.breadcrumb(`merging ${debugName} with id "${id}"`)
 
     const dateCreated = firestore.Timestamp.now()
     const data = { ...item, dateCreated }
     const ref = await firestore()
-      .collection(collectionPath)
+      .collection(
+        typeof collectionPath === 'string'
+          ? collectionPath
+          : collectionPath(args),
+      )
       .doc(id)
       .set(data, { merge: true })
 

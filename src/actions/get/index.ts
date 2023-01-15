@@ -3,20 +3,28 @@ import { WithId } from '../../type'
 import { Log } from '../../Log'
 import { readSnapshot } from '../readSnapshot'
 
-interface FirstoreGetOptions {
-  collectionPath: string
+interface FirstoreGetOptions<Args = undefined> {
+  // The collection path to add the document to.
+  // This can be a string or a function that returns a string based on the parts
+  // passed into the action.
+  // (see the advanced example in src/actions/add/index.ts)
+  collectionPath: string | ((args: Args) => string)
   debugName?: string
 }
 
-export const firestoreGet = <T>({
+export const firestoreGet = <T, A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirstoreGetOptions) => async (id: string) => {
+}: FirstoreGetOptions<A>) => async (id: string, args: A) => {
   try {
     Log.breadcrumb(`getting ${debugName} with id "${id}"`)
 
     const doc = await firestore()
-      .collection(collectionPath)
+      .collection(
+        typeof collectionPath === 'string'
+          ? collectionPath
+          : collectionPath(args),
+      )
       .doc(id)
       .get()
 
