@@ -8,11 +8,13 @@ interface FirstoreMergeOptions<T, A = Record<string, any>> {
   // (see the advanced example in src/actions/add/index.ts)
   collectionPath: string | ((args: A & { data: Partial<T> }) => string)
   debugName?: string
+  addMetadata?: boolean
 }
 
 export const firestoreMerge = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
+  addMetadata,
 }: FirstoreMergeOptions<T, A>) => async (
   id: string,
   item: Partial<T>,
@@ -21,8 +23,13 @@ export const firestoreMerge = <T, A = Record<string, any>>({
   try {
     Log.breadcrumb(`merging ${debugName} with id "${id}"`)
 
-    const dateCreated = firestore.Timestamp.now()
-    const data = { ...item, dateCreated } as Partial<T>
+    const data = {
+      ...item,
+      ...(addMetadata && {
+        'metadata.timeUpdated': firestore.Timestamp.now(),
+      }),
+    }
+
     const ref = await firestore()
       .collection(
         typeof collectionPath === 'string'

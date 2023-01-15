@@ -8,11 +8,13 @@ interface FirstoreUpdateOptions<T, A = Record<string, any>> {
   // (see the advanced example in src/actions/add/index.ts)
   collectionPath: string | ((args: A & { data: Partial<T> }) => string)
   debugName?: string
+  addMetadata?: boolean
 }
 
 export const firestoreUpdate = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
+  addMetadata,
 }: FirstoreUpdateOptions<T, A>) => async (
   id: string,
   updates: Partial<T>,
@@ -21,8 +23,13 @@ export const firestoreUpdate = <T, A = Record<string, any>>({
   try {
     Log.breadcrumb(`updating ${debugName} with id "${id}"`)
 
-    const dateUpdated = firestore.Timestamp.now()
-    const data = { ...updates, dateUpdated }
+    const data = {
+      ...updates,
+      ...(addMetadata && {
+        'metadata.timeUpdated': firestore.Timestamp.now(),
+      }),
+    }
+
     const ref = await firestore()
       .collection(
         typeof collectionPath === 'string'

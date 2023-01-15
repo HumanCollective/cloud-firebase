@@ -8,11 +8,13 @@ interface FirstoreSetOptions<T, A = Record<string, any>> {
   // (see the advanced example in src/actions/add/index.ts)
   collectionPath: string | ((args: A & { data: Partial<T> }) => string)
   debugName?: string
+  addMetadata?: boolean
 }
 
 export const firestoreSet = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
+  addMetadata,
 }: FirstoreSetOptions<T, A>) => async (
   id: string,
   item: Partial<T>,
@@ -21,8 +23,14 @@ export const firestoreSet = <T, A = Record<string, any>>({
   try {
     Log.breadcrumb(`setting ${debugName} with id "${id}"`)
 
-    const dateCreated = firestore.Timestamp.now()
-    const data = { ...item, dateCreated }
+    const data = {
+      ...item,
+      ...(addMetadata && {
+        'metadata.timeCreated': firestore.Timestamp.now(),
+        'metadata.timeUpdated': firestore.Timestamp.now(),
+      }),
+    }
+
     const ref = await firestore()
       .collection(
         typeof collectionPath === 'string'

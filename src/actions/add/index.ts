@@ -7,17 +7,24 @@ interface FirstoreCreateOptions<T, A = Record<string, any>> {
   // passed into the action.
   collectionPath: string | ((args: A & { data: T }) => string)
   debugName?: string
+  addMetadata?: boolean
 }
 
 export const firestoreAdd = <T, A = Record<string, any>>({
   collectionPath,
   debugName = 'document',
+  addMetadata,
 }: FirstoreCreateOptions<T, A>) => async (item: T, args?: A) => {
   try {
     Log.breadcrumb(`creating ${debugName}`)
 
-    const dateCreated = firestore.Timestamp.now()
-    const data = { ...item, dateCreated }
+    const data = {
+      ...item,
+      ...(addMetadata && {
+        'metadata.timeCreated': firestore.Timestamp.now(),
+      }),
+    }
+
     const ref = await firestore()
       .collection(
         typeof collectionPath === 'string'
