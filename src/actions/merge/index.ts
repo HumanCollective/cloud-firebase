@@ -16,7 +16,7 @@ export const firestoreMerge = <T, A = undefined>({
 }: FirstoreMergeOptions<A>) => async (
   id: string,
   item: Partial<T>,
-  args: A,
+  args?: A,
 ) => {
   try {
     Log.breadcrumb(`merging ${debugName} with id "${id}"`)
@@ -27,7 +27,7 @@ export const firestoreMerge = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .doc(id)
       .set(data, { merge: true })

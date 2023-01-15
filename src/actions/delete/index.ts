@@ -20,7 +20,7 @@ export const firestoreDelete = <A = undefined>({
   collectionPath,
   debugName = 'document',
   recursive = false,
-}: FirstoreDeleteOptions<A>) => async (id: string, args: A) => {
+}: FirstoreDeleteOptions<A>) => async (id: string, args?: A) => {
   try {
     Log.breadcrumb(`deleting ${debugName} with id "${id}"`)
 
@@ -28,7 +28,7 @@ export const firestoreDelete = <A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .doc(id)
 

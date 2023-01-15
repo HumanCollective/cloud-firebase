@@ -15,7 +15,7 @@ interface FirstoreGetOptions<Args = undefined> {
 export const firestoreGet = <T, A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirstoreGetOptions<A>) => async (id: string, args: A) => {
+}: FirstoreGetOptions<A>) => async (id: string, args?: A) => {
   try {
     Log.breadcrumb(`getting ${debugName} with id "${id}"`)
 
@@ -23,7 +23,7 @@ export const firestoreGet = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .doc(id)
       .get()

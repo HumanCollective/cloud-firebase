@@ -12,7 +12,7 @@ interface FirstoreCreateOptions<A = undefined> {
 export const firestoreAdd = <T, A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirstoreCreateOptions<A>) => async (item: T, args: A) => {
+}: FirstoreCreateOptions<A>) => async (item: T, args?: A) => {
   try {
     Log.breadcrumb(`creating ${debugName}`)
 
@@ -22,7 +22,7 @@ export const firestoreAdd = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .add(data)
 

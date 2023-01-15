@@ -16,7 +16,7 @@ export const firestoreUpdate = <T, A = undefined>({
 }: FirstoreUpdateOptions<A>) => async (
   id: string,
   updates: Partial<T>,
-  args: A,
+  args?: A,
 ) => {
   try {
     Log.breadcrumb(`updating ${debugName} with id "${id}"`)
@@ -27,7 +27,7 @@ export const firestoreUpdate = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .doc(id)
       .update(data)

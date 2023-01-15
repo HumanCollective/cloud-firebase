@@ -13,7 +13,7 @@ interface FirstoreSetOptions<Args = undefined> {
 export const firestoreSet = <T, A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirstoreSetOptions<A>) => async (id: string, item: Partial<T>, args: A) => {
+}: FirstoreSetOptions<A>) => async (id: string, item: Partial<T>, args?: A) => {
   try {
     Log.breadcrumb(`setting ${debugName} with id "${id}"`)
 
@@ -23,7 +23,7 @@ export const firestoreSet = <T, A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .doc(id)
       .set(data)

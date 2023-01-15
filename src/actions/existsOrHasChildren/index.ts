@@ -13,7 +13,7 @@ interface FirestoreExistsOrHasChildrenOptions<Args = undefined> {
 export const firestoreExistsOrHasChildren = <A = undefined>({
   collectionPath,
   debugName = 'document',
-}: FirestoreExistsOrHasChildrenOptions<A>) => async (id: string, args: A) => {
+}: FirestoreExistsOrHasChildrenOptions<A>) => async (id: string, args?: A) => {
   try {
     addBreadcrumb({
       category: 'firebase',
@@ -25,7 +25,7 @@ export const firestoreExistsOrHasChildren = <A = undefined>({
       .collection(
         typeof collectionPath === 'string'
           ? collectionPath
-          : collectionPath(args),
+          : collectionPath(args ?? ({} as A)),
       )
       .doc(id)
       .get()
